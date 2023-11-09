@@ -1,11 +1,13 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+/* eslint-disable */
+
+import { configureStore } from '@reduxjs/toolkit';
 import greetingsReducer from './greetings/greetings';
 
-const rootReducer = combineReducers({
-  greetings: greetingsReducer,
-});
 const store = configureStore({
-  reducer: rootReducer,
+  reducer: {
+    greetings: greetingsReducer,
+  },
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
 export default store;

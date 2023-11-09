@@ -1,45 +1,39 @@
-// Actions
-const SET_GREETING = 'greetings/greetings/SET_GREETING';
-const LINK = 'http://127.0.0.1:3000/api/random_greeting';
+/* eslint-disable */
+// greetingsSlice.js
 
-const initialState = {
-  greeting: '',
-};
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-// Reducer
-export default function greetingsReducer(state = initialState, action) {
-  switch (action.type) {
-    case SET_GREETING:
-      return {
-        ...state,
-        greeting: action.payload.greeting_text,
-      };
-
-    default:
-      return state;
+export const fetchRandomGreeting = createAsyncThunk(
+  'greetings/fetchRandomGreeting',
+  async () => {
+    const response = await fetch('http://127.0.0.1:3000/api/random_greeting');
+    const data = await response.json();
+    return data;
   }
-}
+);
 
-// Action Creators
-const setGreetingAction = (greetingObj) => ({
-  type: SET_GREETING,
-  payload: greetingObj,
+const greetingsSlice = createSlice({
+  name: 'greetings',
+  initialState: {
+    greeting: '',
+    status: 'idle',
+    error: null,
+  },
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchRandomGreeting.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchRandomGreeting.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.greeting = action.payload;
+      })
+      .addCase(fetchRandomGreeting.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
+      });
+  },
 });
 
-const fetchGreetingObj = () => async (dispatch) => {
-  await fetch(LINK, {
-    method: 'get',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((result) => result.json())
-    .then((res) => {
-      const msg = {
-        greeting_text: res.greeting_text,
-      };
-      dispatch(setGreetingAction(msg));
-    });
-};
-
-export { fetchGreetingObj, setGreetingAction };
+export default greetingsSlice.reducer;
